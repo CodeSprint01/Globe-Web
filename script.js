@@ -37,7 +37,7 @@ let globalUniforms = {
 let rad = 5;
 const shellGeometry = new THREE.SphereBufferGeometry(rad + 0.2, 64, 64);
 const textureLoader1 = new THREE.TextureLoader();
-const texture3D1 = textureLoader1.load('./map2.jpeg'); 
+const texture3D1 = textureLoader1.load('./map1.jpeg'); 
 const shellMaterial = new THREE.MeshBasicMaterial({
   map: texture3D1,
   transparent: false,
@@ -54,7 +54,7 @@ const test1 = new THREE.PlaneGeometry(0.045, 0.045);
 const test2 = new THREE.MeshBasicMaterial({
   color: 0x000000,
   transparent: true,
-  opacity: 0.6,
+  opacity: 0.5,
   // blending: THREE.NormalBlending,
   side: THREE.DoubleSide,
 });
@@ -101,7 +101,7 @@ for (let i = 0; i < numInstances; i++) {
 }
 
 const markerPositions = [];
-const markerCount = 1;
+const markerCount = 100;
 let markerInfo = []; // information on markers
 let gMarker = new THREE.PlaneGeometry(0.7, 0.7);
 let mMarker = new THREE.MeshBasicMaterial({
@@ -150,8 +150,47 @@ let markers = new THREE.InstancedMesh(gMarker, mMarker, markerCount);
 let dummy = new THREE.Object3D();
 let phase = [];
 for (let i = 0; i < markerCount; i++) {
-dummy.position.randomDirection().setLength(rad + 0.2);
-dummy.lookAt(dummy.position.clone().setLength(rad + 1));
+  dummy.position.randomDirection().setLength(rad + 0.2);
+  dummy.lookAt(dummy.position.clone().setLength(rad + 1));
+
+  let mMarker = new THREE.MeshBasicMaterial({
+    color: i === 0 ? 0xFFD700 : 0x2fae2d,
+    opacity: 0.0,
+    transparent: false,
+    onBeforeCompile: (shader) => {
+      shader.uniforms.time = globalUniforms.time;
+      shader.vertexShader = `
+        attribute float phase;
+        varying float vPhase;
+        ${shader.vertexShader}
+      `.replace(
+        `#include <begin_vertex>`,
+        `#include <begin_vertex>
+        vPhase = phase; // de-synch of ripples
+        `
+      );
+      shader.fragmentShader = `
+        uniform float time;
+        varying float vPhase;
+        ${shader.fragmentShader}
+      `.replace(
+        `vec4 diffuseColor = vec4( diffuse, opacity );`,
+        `
+        vec2 lUv = (vUv - 0.5) * 2.;
+        float val = 0.;
+        float lenUv = length(lUv);
+        val = max(val, 1. - step(0.01, lenUv)); // central circle
+        val = max(val, step(0.08, lenUv) - step(0.05, lenUv)); // outer circle
+        
+        float tShift = fract(time * 0.5 + vPhase);
+        val = max(val, step(0.1 + (tShift * 0.01), lenUv) - step(0.05 + (tShift * 0.4), lenUv)); // ripple
+        
+        if (val < 0.1) discard;
+        
+        vec4 diffuseColor = vec4( diffuse, opacity );`
+      );
+    },
+  });
 dummy.updateMatrix();
 markers.setMatrixAt(i, dummy.matrix);
 phase.push(Math.random());
