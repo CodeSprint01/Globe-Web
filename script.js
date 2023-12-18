@@ -47,11 +47,11 @@ scene.add(shell);
 const activeUsers = memberCount;
 
 const sphereRadius = rad + 0.2; // Radius of the shell sphere
-const numInstances = 1000000 - activeUsers;
+const numInstances = 100 - activeUsers;
 console.log("sikander", memberCount, numInstances)
 
-const test1 = new THREE.PlaneGeometry(0.045, 0.045);
-const test2 = new THREE.MeshBasicMaterial({
+const diceplan = new THREE.PlaneGeometry(0.145, 0.145);
+const dicegeomatry = new THREE.MeshBasicMaterial({
   color: 0x000000,
   transparent: true,
   opacity: 0.6,
@@ -59,8 +59,8 @@ const test2 = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide,
 });
 
-const test3 = new THREE.InstancedMesh(test1, test2, numInstances);
-scene.add(test3);
+const MillionDices = new THREE.InstancedMesh(diceplan, dicegeomatry, numInstances);
+scene.add(MillionDices);
 
 
 const instancedMatrix = new THREE.Matrix4();
@@ -87,24 +87,19 @@ function distribution(samples, sphereRadius) {
 
   return points;
 }
-
-
-
-
-
 for (let i = 0; i < numInstances; i++) {
   const position = distributionPoints[i];
   instancedMatrix.makeTranslation(position.x, position.y, position.z);
   const normal = position.clone().normalize();
   instancedMatrix.lookAt(new THREE.Vector3(), normal, new THREE.Vector3(0, 1, 0));
-  test3.setMatrixAt(i, instancedMatrix);
+  MillionDices.setMatrixAt(i, instancedMatrix);
 }
 
-const markerPositions = [];
-const markerCount = 1;
-let markerInfo = []; // information on markers
-let gMarker = new THREE.PlaneGeometry(0.7, 0.7);
-let mMarker = new THREE.MeshBasicMaterial({
+const onemarkerPositions = [];
+const oneMarkerCount = 1;
+let markerInfo1 = []; // information on markers1
+let gMarker1 = new THREE.PlaneGeometry(0.7, 0.7);
+let mMarker1 = new THREE.MeshBasicMaterial({
 color: 0x2fae2d,
 opacity: 0.0,
 transparent: false,
@@ -144,6 +139,80 @@ onBeforeCompile: (shader) => {
   //console.log(shader.fragmentShader)
 }
 });
+mMarker1.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
+let markers1 = new THREE.InstancedMesh(gMarker1, mMarker1, oneMarkerCount);
+
+let dummy1 = new THREE.Object3D();
+let phase1 = [];
+for (let i = 0; i < oneMarkerCount; i++) {
+dummy1.position.randomDirection().setLength(rad + 0.2);
+dummy1.lookAt(dummy1.position.clone().setLength(rad + 1));
+dummy1.updateMatrix();
+markers1.setMatrixAt(i, dummy1.matrix);
+phase1.push(Math.random());
+
+markerInfo1.push({
+  id: i + 1,
+  mag: THREE.MathUtils.randInt(1, 10),
+  crd: dummy1.position.clone()
+});
+onemarkerPositions.push(dummy1.position.clone()); // Store marker positions
+}
+gMarker1.setAttribute(
+"phase1",
+new THREE.InstancedBufferAttribute(new Float32Array(phase1), 1)
+);
+
+
+scene.add(markers1);
+
+
+
+
+const markerPositions = [];
+const markerCount = 100;
+let markerInfo = []; // information on markers
+let gMarker = new THREE.PlaneGeometry(0.7, 0.7);
+let mMarker = new THREE.MeshBasicMaterial({
+color: 0xfddc5c,
+opacity: 0.0,
+transparent: false,
+onBeforeCompile: (shader) => {
+  shader.uniforms.time = globalUniforms.time;
+  shader.vertexShader = `
+  attribute float phase;
+  varying float vPhase;
+  ${shader.vertexShader}
+  `.replace(
+    `#include <begin_vertex>`,
+    `#include <begin_vertex>
+    vPhase = phase; // de-synch of ripples
+    `
+    );
+    //console.log(shader.vertexShader);
+    shader.fragmentShader = `
+    uniform float time;
+    varying float vPhase;
+    ${shader.fragmentShader}
+    `.replace(
+      `vec4 diffuseColor = vec4( diffuse, opacity );`,
+      `
+    vec2 lUv = (vUv - 0.5) * 2.;
+    float val = 0.;
+    float lenUv = length(lUv);
+    val = max(val, 1. - step(0.05, lenUv)); // central circle
+    val = max(val, step(0.01, lenUv) - step(0.02, lenUv)); // outer circle
+    
+    float tShift = fract(time * 0.5 + vPhase);
+    val = max(val, step(0.1 + (tShift * 0.01), lenUv) - step(0.05 + (tShift * 0.01), lenUv)); // ripple
+    
+    if (val < 0.1) discard;
+    
+    vec4 diffuseColor = vec4( diffuse, opacity );`
+  );
+  //console.log(shader.fragmentShader)
+}
+});
 mMarker.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
 let markers = new THREE.InstancedMesh(gMarker, mMarker, markerCount);
 
@@ -167,9 +236,29 @@ gMarker.setAttribute(
 "phase",
 new THREE.InstancedBufferAttribute(new Float32Array(phase), 1)
 );
-
-
 scene.add(markers);
+// Add a new variable to track the number of instances
+let currentNumInstances = numInstances;
+
+function removeRandomInstances(NumtoRemove) {
+  NumtoRemove = Math.min(NumtoRemove, currentNumInstances);
+
+  // Update MillionDices instance matrices
+  for (let i = 0; i < NumtoRemove; i++) {
+    const lastIndex = currentNumInstances - 1;
+    MillionDices.setMatrixAt(lastIndex, new THREE.Matrix4()); // set an empty matrix
+    currentNumInstances--;
+  }
+
+  // Update MillionDices matrices
+  MillionDices.instanceMatrix.needsUpdate = true;
+}
+
+
+
+// removeRandomInstances(10);
+
+
 
 let galaxyGeometry = new THREE.SphereBufferGeometry(200, 550, 550);
 let galaxyMaterial = new THREE.MeshBasicMaterial({
@@ -192,13 +281,13 @@ var list = await db.collection("users")
   .get();
 
   console.log(list.docs.length);
-  // const markerCount = 30;
+  // const oneMarkerCount = 30;
   let labelDiv = document.getElementById("markerLabel");
 let closeBtn = document.getElementById("closeButton");
 closeBtn.addEventListener("pointerdown", event => {
   labelDiv.classList.add("hidden");
 })
-const initialMarker = markerInfo[0];
+const initialMarker = markerInfo1[0];
 
 // Set camera position to the marker's position
 camera.position.copy(initialMarker.crd.clone().setLength(14));

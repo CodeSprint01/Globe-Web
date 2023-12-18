@@ -50,3 +50,14 @@ body {
   background: transparent;
   color: white;
 }
+
+#activeUsersBox {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+}
