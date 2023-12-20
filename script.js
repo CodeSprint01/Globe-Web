@@ -339,7 +339,7 @@ function removeRandomInstances(numToRemove) {
 }
 
 
-// removeRandomInstances(500)
+removeRandomInstances(100)
 
 shell.renderOrder = 1;
 MillionDices.renderOrder = 2;
