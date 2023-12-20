@@ -41,52 +41,107 @@ const texture3D1 = textureLoader1.load('./map2.jpeg');
 const shellMaterial = new THREE.MeshBasicMaterial({
   map: texture3D1,
   transparent: false,
+  depthTest: true
 })
+const activeUsers = 1500;
+
+function updateDiceGeometryandNumInstances(activeUsers){
+let numberDots;
+let dotHeight;
+let dotWidth;
+
+switch(true){
+  case activeUsers <= 1000:
+    dotHeight = 0.07;
+    dotWidth = 0.07;
+    numberDots = 100000;
+    break;
+  case activeUsers <= 2000:
+    dotHeight = 0.05;
+    dotWidth = 0.05;
+    numberDots = 200000;
+    break;
+  case activeUsers <= 3000:
+    dotHeight = 0.04;
+    dotWidth = 0.04;
+    numberDots = 300000;
+    break;
+  case activeUsers <= 4000:
+    dotHeight = 0.035;
+    dotWidth = 0.035;
+    numberDots = 400000;
+    break;
+  case activeUsers <= 5000:
+    dotHeight = 0.029;
+    dotWidth = 0.029;
+    numberDots = 500000;
+    break;
+  case activeUsers <= 6000:
+    dotHeight = 0.015;
+    dotWidth = 0.015;
+    numberDots = 600000;
+  case activeUsers <= 7000:
+    dotHeight = 0.005;
+    dotWidth = 0.005;
+    numberDots = 700000;
+  default:
+    dotHeight = 0.045;
+    dotWidth = 0.045;
+    numberDots = 1000000;
+}
+
+return {
+  dotHeight,
+  dotWidth,
+  numberDots
+};
+}
+
+const dotSwitchData = updateDiceGeometryandNumInstances(activeUsers)
+console.log(dotSwitchData,"testing dots data");
 const shell = new THREE.Mesh(shellGeometry, shellMaterial);
-scene.add(shell);
-const activeUsers = memberCount;
 
 const sphereRadius = rad + 0.2; // Radius of the shell sphere
-const numInstances = 100 - activeUsers;
+const numInstances = dotSwitchData.numberDots;
 console.log("sikander", memberCount, numInstances)
-
-const diceplan = new THREE.PlaneGeometry(0.145, 0.145);
+const diceplan = new THREE.PlaneGeometry(dotSwitchData.dotHeight, dotSwitchData.dotWidth);
 const dicegeomatry = new THREE.MeshBasicMaterial({
   color: 0x000000,
   transparent: true,
-  opacity: 0.6,
+  opacity: 0.8,
   // blending: THREE.NormalBlending,
   side: THREE.DoubleSide,
+  depthTest: true
 });
 
-const MillionDices = new THREE.InstancedMesh(diceplan, dicegeomatry, numInstances);
-scene.add(MillionDices);
+let MillionDices = new THREE.InstancedMesh(diceplan, dicegeomatry, numInstances);
 
 
 const instancedMatrix = new THREE.Matrix4();
-const distributionPoints = distribution(numInstances, sphereRadius);
+// const distributionPoints = distribution(numInstances, sphereRadius);
 
-function distribution(samples, sphereRadius) {
+function distributeOnFibonacciSphere(samples, sphereRadius) {
   const points = [];
-  const rows = Math.ceil(Math.sqrt(samples));
-  const cols = Math.ceil(samples / rows);
+  const phi = Math.PI * (3. - Math.sqrt(5.)); // golden angle in radians
+  
+  for (let i = 0; i < samples; i++) {
+    const y = 1 - (i / (samples - 1)) * 2; // y goes from 1 to -1
+    const radius = Math.sqrt(1 - y * y); // radius at y
 
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const u = (j / (cols - 4)) * Math.PI * 5;
-      const v = (i / (rows - 3)) * Math.PI;
+    const theta = phi * i; // golden angle increment
 
-      // Adjusted range and scaling based on sphereRadius
-      const x = Math.cos(u) * Math.sin(v) * sphereRadius;
-      const y = Math.sin(u) * Math.sin(v) * sphereRadius;
-      const z = Math.cos(v) * sphereRadius;
-
-      points.push(new THREE.Vector3(x, y, z));
-    }
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    
+    points.push(new THREE.Vector3(x, y, z).multiplyScalar(sphereRadius));
   }
 
   return points;
 }
+
+// Usage
+const distributionPoints = distributeOnFibonacciSphere(numInstances, sphereRadius);
+
 for (let i = 0; i < numInstances; i++) {
   const position = distributionPoints[i];
   instancedMatrix.makeTranslation(position.x, position.y, position.z);
@@ -95,16 +150,18 @@ for (let i = 0; i < numInstances; i++) {
   MillionDices.setMatrixAt(i, instancedMatrix);
 }
 
+
 const onemarkerPositions = [];
 const oneMarkerCount = 1;
 let markerInfo1 = []; // information on markers1
 let gMarker1 = new THREE.PlaneGeometry(0.7, 0.7);
 let mMarker1 = new THREE.MeshBasicMaterial({
-color: 0x2fae2d,
-opacity: 0.0,
-transparent: false,
-onBeforeCompile: (shader) => {
-  shader.uniforms.time = globalUniforms.time;
+  color: 0x2fae2d,
+  opacity: 0.0,
+  transparent: false,
+  depthTest: true,
+  onBeforeCompile: (shader) => {
+    shader.uniforms.time = globalUniforms.time;
   shader.vertexShader = `
   attribute float phase;
   varying float vPhase;
@@ -135,8 +192,8 @@ onBeforeCompile: (shader) => {
     if (val < 0.1) discard;
     
     vec4 diffuseColor = vec4( diffuse, opacity );`
-  );
-  //console.log(shader.fragmentShader)
+    );
+    //console.log(shader.fragmentShader)
 }
 });
 mMarker1.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
@@ -164,7 +221,6 @@ new THREE.InstancedBufferAttribute(new Float32Array(phase1), 1)
 );
 
 
-scene.add(markers1);
 
 
 
@@ -209,8 +265,8 @@ onBeforeCompile: (shader) => {
     if (val < 0.1) discard;
     
     vec4 diffuseColor = vec4( diffuse, opacity );`
-  );
-  //console.log(shader.fragmentShader)
+    );
+    //console.log(shader.fragmentShader)
 }
 });
 mMarker.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
@@ -236,27 +292,64 @@ gMarker.setAttribute(
 "phase",
 new THREE.InstancedBufferAttribute(new Float32Array(phase), 1)
 );
-scene.add(markers);
-// Add a new variable to track the number of instances
-let currentNumInstances = numInstances;
 
-function removeRandomInstances(NumtoRemove) {
-  NumtoRemove = Math.min(NumtoRemove, currentNumInstances);
+function removeRandomInstances(numToRemove) {
+  const currentNumInstances = MillionDices.count;
 
-  // Update MillionDices instance matrices
-  for (let i = 0; i < NumtoRemove; i++) {
-    const lastIndex = currentNumInstances - 1;
-    MillionDices.setMatrixAt(lastIndex, new THREE.Matrix4()); // set an empty matrix
-    currentNumInstances--;
+  if (numToRemove > currentNumInstances) {
+    console.error("Trying to remove more instances than available.");
+    return;
   }
 
-  // Update MillionDices matrices
-  MillionDices.instanceMatrix.needsUpdate = true;
+  const indicesToRemove = [];
+  while (indicesToRemove.length < numToRemove) {
+    const randomIndex = Math.floor(Math.random() * currentNumInstances);
+    if (!indicesToRemove.includes(randomIndex)) {
+      indicesToRemove.push(randomIndex);
+    }
+  }
+
+  // Create a new InstancedMesh with the instances to keep
+  const newMillionDices = new THREE.InstancedMesh(
+    MillionDices.geometry,
+    MillionDices.material,
+    currentNumInstances - numToRemove
+  );
+
+  // Copy the matrices, excluding the instances to remove
+  let newIndex = 0;
+  for (let i = 0; i < currentNumInstances; i++) {
+    if (!indicesToRemove.includes(i)) {
+      const matrix = new THREE.Matrix4();
+      matrix.fromArray(MillionDices.instanceMatrix.array, i * 16);
+      newMillionDices.setMatrixAt(newIndex, matrix);
+      newIndex++;
+    }
+  }
+
+  // Add the new mesh to the scene (replace the old one if needed)
+  scene.remove(MillionDices);
+  scene.add(newMillionDices);
+
+  // Update matrix after removal
+  newMillionDices.instanceMatrix.needsUpdate = true;
+
+  // Update the reference to the new mesh
+  MillionDices = newMillionDices;
 }
 
 
+// removeRandomInstances(500)
 
-// removeRandomInstances(10);
+shell.renderOrder = 1;
+MillionDices.renderOrder = 2;
+markers.renderOrder = 3;
+markers1.renderOrder = 4;
+scene.add(shell);
+scene.add(MillionDices);
+
+scene.add(markers1);
+// scene.add(markers);
 
 
 
@@ -277,14 +370,14 @@ textureLoader2.load(
 );
   const db = firebase.firestore();
   
-var list = await db.collection("users")
+  var list = await db.collection("users")
   .get();
-
+  
   console.log(list.docs.length);
   // const oneMarkerCount = 30;
   let labelDiv = document.getElementById("markerLabel");
-let closeBtn = document.getElementById("closeButton");
-closeBtn.addEventListener("pointerdown", event => {
+  let closeBtn = document.getElementById("closeButton");
+  closeBtn.addEventListener("pointerdown", event => {
   labelDiv.classList.add("hidden");
 })
 const initialMarker = markerInfo1[0];
