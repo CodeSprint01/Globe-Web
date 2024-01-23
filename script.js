@@ -43,7 +43,7 @@ const shellMaterial = new THREE.MeshBasicMaterial({
   transparent: false,
   depthTest: true
 })
-const activeUsers = 1500;
+const activeUsers = memberCount;
 
 function updateDiceGeometryandNumInstances(activeUsers){
 let numberDots;
@@ -339,7 +339,7 @@ function removeRandomInstances(numToRemove) {
 }
 
 
-removeRandomInstances(100)
+removeRandomInstances(memberCount)
 
 shell.renderOrder = 1;
 MillionDices.renderOrder = 2;

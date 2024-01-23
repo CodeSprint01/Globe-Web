@@ -16,28 +16,30 @@
       <div class="text" id="magnitude"></div>
       <div class="text" id="coordinates"></div>
     </div>
-    
+    <!-- <div id="test">
+      <button onclick="removeFirestore()">Click me</button>
+  </div> -->
+
     <script type="text/javascript">
       var isChange = false;
       var memberCount = localStorage.getItem("Ipaddress")
 
       window.onbeforeunload = async (e) => {
-        localStorage.setItem("isOpen", true);
         e.preventDefault();
-        var myIP = localStorage.getItem("ipAddress");
-        console.log(myIP, "this is ");
-        removeFirestore(myIP);
+       await removeFirestore();
       };
-
-      const removeFirestore = async (ip) => {
+      const removeFirestore = async () => {
+        localStorage.setItem("isOpen", true);
+        var ip = localStorage.getItem("ipAddress");
+        console.log(ip, "this is ");
         var raw = "";
 
         var requestOptions = {
           method: 'DELETE',
-          body: raw,
-          redirect: 'follow'
+          // body: raw,
+          // redirect: 'follow'
         };
-        fetch("https://127.0.0.1:8000/api/deleteIp/" + ip, requestOptions)
+        fetch("http://127.0.0.1:8000/api/deleteIp/" + ip, requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
@@ -49,13 +51,13 @@
   
   <body>
     <!-- Add a div element for the active users box -->
-    <div id="activeUsersBox">Active Users: <span id="activeUsersCount">0</span></div>    
+    <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span></div>    
     <script type="text/javascript">
       // Your existing JavaScript code here
 
       // Function to update the content of the active users box
       function updateActiveUsersBox() {
-        const activeUsersCount = 100 || 0;
+        const activeUsersCount = memberCount || 0;
         document.getElementById('activeUsersCount').textContent = activeUsersCount;
       }
 
