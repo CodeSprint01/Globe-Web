@@ -1,57 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Globe</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  
-  <body>
-    <!-- <button id="addPoint">ADD POINT</button> -->
-    
-    <!-- partial:index.partial.html -->
-    <div id="markerLabel" class="hidden">
-      <button id="closeButton">X</button>
-      <div class="text" id="idNum"></div>
-      <div class="text" id="magnitude"></div>
-      <div class="text" id="coordinates"></div>
-    </div>
-    <!-- <div id="test">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Globe</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <!-- <button id="addPoint">ADD POINT</button> -->
+
+  <!-- partial:index.partial.html -->
+  <div id="markerLabel" class="hidden">
+    <button id="closeButton">X</button>
+    <div class="text" id="idNum"></div>
+    <div class="text" id="magnitude"></div>
+    <div class="text" id="coordinates"></div>
+  </div>
+  <!-- <div id="test">
       <button onclick="removeFirestore()">Click me</button>
   </div> -->
 
-    <script type="text/javascript">
-      var isChange = false;
-      var memberCount = localStorage.getItem("Ipaddress")
 
-      window.onbeforeunload = async (e) => {
-        e.preventDefault();
-       await removeFirestore();
+  <script>
+    const baseURL = "http://127.0.0.1:8000";
+  </script>
+  <script type="text/javascript">
+    var isChange = false;
+    var memberCount = localStorage.getItem("Ipaddress")
+
+    window.onbeforeunload = async (e) => {
+      e.preventDefault();
+      await removeFirestore();
+    };
+    const removeFirestore = async () => {
+      localStorage.setItem("isOpen", true);
+      var ip = localStorage.getItem("ipAddress");
+      console.log(ip, "this is ");
+      var raw = "";
+
+      var requestOptions = {
+        method: 'DELETE',
+        // body: raw,
+        // redirect: 'follow'
       };
-      const removeFirestore = async () => {
-        localStorage.setItem("isOpen", true);
-        var ip = localStorage.getItem("ipAddress");
-        console.log(ip, "this is ");
-        var raw = "";
-
-        var requestOptions = {
-          method: 'DELETE',
-          // body: raw,
-          // redirect: 'follow'
-        };
-        fetch("http://127.0.0.1:8000/api/deleteIp/" + ip, requestOptions)
+      fetch(`${baseURL}/api/deleteIp` + ip, requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
-      };
-    </script>
-    <!-- <script src="https://github.com/mrdoob/three.js/blob/dev/examples/js/loaders/FBXLoader.js"></script> -->
-    <!-- partial -->
+    };
+  </script>
+  <!-- <script src="https://github.com/mrdoob/three.js/blob/dev/examples/js/loaders/FBXLoader.js"></script> -->
+  <!-- partial -->
   </head>
-  
+
   <body>
     <!-- Add a div element for the active users box -->
-    <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span></div>    
+    <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span></div>
     <script type="text/javascript">
       // Your existing JavaScript code here
 
@@ -68,45 +73,45 @@
       setInterval(updateActiveUsersBox, 1000); // Update every second for demonstration purposes
     </script>
 
-
+    <!-- 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://mike-starr.github.io/webgl-deferred-lighting/examples/scaled/index.html"></script>
+    <script src="https://mike-starr.github.io/webgl-deferred-lighting/examples/scaled/index.html"></script> -->
 
     <script type="module">
-      async function autoRunner() {
-        console.log("running");
-        var isOpen = localStorage.getItem("isOpen");
-        if (isOpen) {
-          var myIP = localStorage.getItem("ipAddress");
-          if (myIP) {
-            var doc = await db
-              .collection("users")
-              .where("data", "==", myIP)
-              .get();
-            console.log(doc, "this is my IP", myIP);
-            if (doc.empty) {
-              addCustomDataToFirestore(myIP);
-            }
-          }
-        }
-      }
+      // async function autoRunner() {
+      //   console.log("running");
+      //   var isOpen = localStorage.getItem("isOpen");
+      //   if (isOpen) {
+      //     var myIP = localStorage.getItem("ipAddress");
+      //     if (myIP) {
+      //       var doc = await db
+      //         .collection("users")
+      //         .where("data", "==", myIP)
+      //         .get();
+      //       console.log(doc, "this is my IP", myIP);
+      //       if (doc.empty) {
+      //         addCustomDataToFirestore(myIP);
+      //       }
+      //     }
+      //   }
+      // }
 
-      isChange = true;
+      // isChange = true;
 
       var myIP;
-      const firebaseConfig = {
-        apiKey: "AIzaSyDPxU_rZPK_K9I0rjQJ3M3DWXqqTSiORQs",
-        authDomain: "globeupdated-42b99.firebaseapp.com",
-        projectId: "globeupdated-42b99",
-        storageBucket: "globeupdated-42b99.appspot.com",
-        messagingSenderId: "137226728360",
-        appId: "1:137226728360:web:0faa78d64049642dabe39d",
-      };
-      // Initialize Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      // app.firebase
-      const db = firebase.firestore();
+      // const firebaseConfig = {
+      //   apiKey: "AIzaSyDPxU_rZPK_K9I0rjQJ3M3DWXqqTSiORQs",
+      //   authDomain: "globeupdated-42b99.firebaseapp.com",
+      //   projectId: "globeupdated-42b99",
+      //   storageBucket: "globeupdated-42b99.appspot.com",
+      //   messagingSenderId: "137226728360",
+      //   appId: "1:137226728360:web:0faa78d64049642dabe39d",
+      // };
+      // // Initialize Firebase
+      // const app = firebase.initializeApp(firebaseConfig);
+      // // app.firebase
+      // const db = firebase.firestore();
 
       fetch("https://api.ipify.org?format=json")
         .then((response) => response.json())
@@ -115,45 +120,89 @@
           myIP = data.ip;
           localStorage.setItem("ipAddress", myIP);
 
-          addCustomDataToFirestore(data.ip);
+          // addCustomDataToFirestore(data.ip);
           localStorage.setItem("isOpen", false);
-          
 
-      var formdata = new FormData();
-      formdata.append("ip", myIP);
 
-      var requestOptions = {
-        method: "POST",
-        body: formdata,
-        redirect: "follow",
-      };
-      fetch("http://127.0.0.1:8000/api/addIp", requestOptions)
-        .then((response) => response.text())
-        .then((result) => {
-          let data = JSON.parse(result)
-        memberCount = data.count;
-        console.log(result,memberCount, "ARHAM TESTING" );
-        localStorage.setItem("Ipaddress", memberCount);
-      })
-        .catch((error) => console.log("error", error));
-          var myInterval = setInterval(autoRunner, 10000);
+          var formdata = new FormData();
+          formdata.append("ip", myIP);
+
+          var requestOptions = {
+            method: "POST",
+            body: formdata,
+            redirect: "follow",
+          };
+          fetch(`${baseURL}/api/addIp`, requestOptions)
+            .then((response) => response.text())
+            .then((result) => {
+              let data = JSON.parse(result)
+              memberCount = data.count;
+              console.log(result, memberCount, "ARHAM TESTING");
+              localStorage.setItem("Ipaddress", memberCount);
+            })
+          // .catch((error) => console.log("error", error));
+          // var myInterval = setInterval(autoRunner, 10000);
         })
         .catch((error) => {
           console.error(error);
         });
 
-      const addCustomDataToFirestore = (ip) => {
-        // Reference to a Firestore collection (you can create a collection if it doesn't exist)
-        const customDataCollection = db.collection("users");
+      // const addCustomDataToFirestore = (ip) => {
+      //   // Reference to a Firestore collection (you can create a collection if it doesn't exist)
+      //   const customDataCollection = db.collection("users");
 
-        // Add the custom data to Firestore with a timestamp
-        customDataCollection.doc(ip).set({
-          data: ip,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      //   // Add the custom data to Firestore with a timestamp
+      //   customDataCollection.doc(ip).set({
+      //     data: ip,
+      //     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      //   });
+      // };
+    </script>
+    <script>
+      makeAPIrequest();
+      setInterval(makeAPIrequest, 130000)
+      function makeAPIrequest() {
+      var myIP;
+
+      fetch("https://api.ipify.org?format=json")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.ip);
+          myIP = data.ip;
+          localStorage.setItem("ipAddress", myIP);
+
+          // addCustomDataToFirestore(data.ip);
+          localStorage.setItem("isOpen", false);
+
+
+          var formdata = new FormData();
+          formdata.append("ip", myIP);
+
+          var requestOptions = {
+            method: "POST",
+            body: formdata,
+            redirect: "follow",
+          };
+          fetch(`${baseURL}/api/addIp`, requestOptions)
+            .then((response) => response.text())
+            .then((result) => {
+              let data = JSON.parse(result)
+              memberCount = data.count;
+              console.log(result, memberCount, "sikander TESTING");
+              localStorage.setItem("Ipaddress", memberCount);
+            })
+          // .catch((error) => console.log("error", error));
+          // var myInterval = setInterval(autoRunner, 10000);
+        })
+        .catch((error) => {
+          console.error(error);
         });
-      };
+
+
+        }
     </script>
 
     <script type="module" src="./script.js"></script>
   </body>
+
 </html>

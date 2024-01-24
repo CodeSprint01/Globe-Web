@@ -368,12 +368,12 @@ textureLoader2.load(
     scene.add(galaxy);
   }
 );
-  const db = firebase.firestore();
+  // const db = firebase.firestore();
   
-  var list = await db.collection("users")
-  .get();
+  // var list = await db.collection("users")
+  // .get();
   
-  console.log(list.docs.length);
+  // console.log(list.docs.length);
   // const oneMarkerCount = 30;
   let labelDiv = document.getElementById("markerLabel");
   let closeBtn = document.getElementById("closeButton");
