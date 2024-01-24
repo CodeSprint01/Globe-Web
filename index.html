@@ -36,7 +36,7 @@
     const removeFirestore = async () => {
       localStorage.setItem("isOpen", true);
       var ip = localStorage.getItem("ipAddress");
-      console.log(ip, "this is ");
+      // console.log(ip, "this is ");
       var raw = "";
 
       var requestOptions = {
@@ -46,7 +46,7 @@
       };
       fetch(`${baseURL}/api/deleteIp` + ip, requestOptions)
         .then(response => response.text())
-        .then(result => console.log(result))
+        // .then(result => console.log(result))
         .catch(error => console.log('error', error));
     };
   </script>
@@ -116,7 +116,7 @@
       fetch("https://api.ipify.org?format=json")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.ip);
+          // console.log(data.ip);
           myIP = data.ip;
           localStorage.setItem("ipAddress", myIP);
 
@@ -137,7 +137,7 @@
             .then((result) => {
               let data = JSON.parse(result)
               memberCount = data.count;
-              console.log(result, memberCount, "ARHAM TESTING");
+              // console.log(result, memberCount, "ARHAM TESTING");
               localStorage.setItem("Ipaddress", memberCount);
             })
           // .catch((error) => console.log("error", error));
@@ -167,7 +167,7 @@
       fetch("https://api.ipify.org?format=json")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.ip);
+          // console.log(data.ip);
           myIP = data.ip;
           localStorage.setItem("ipAddress", myIP);
 
@@ -188,7 +188,7 @@
             .then((result) => {
               let data = JSON.parse(result)
               memberCount = data.count;
-              console.log(result, memberCount, "sikander TESTING");
+              // console.log(result, memberCount, "sikander TESTING");
               localStorage.setItem("Ipaddress", memberCount);
             })
           // .catch((error) => console.log("error", error));

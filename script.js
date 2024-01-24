@@ -98,12 +98,12 @@ return {
 }
 
 const dotSwitchData = updateDiceGeometryandNumInstances(activeUsers)
-console.log(dotSwitchData,"testing dots data");
+// console.log(dotSwitchData,"testing dots data");
 const shell = new THREE.Mesh(shellGeometry, shellMaterial);
 
 const sphereRadius = rad + 0.2; // Radius of the shell sphere
 const numInstances = dotSwitchData.numberDots;
-console.log("sikander", memberCount, numInstances)
+// console.log("sikander", memberCount, numInstances)
 const diceplan = new THREE.PlaneGeometry(dotSwitchData.dotHeight, dotSwitchData.dotWidth);
 const dicegeomatry = new THREE.MeshBasicMaterial({
   color: 0x000000,
@@ -396,7 +396,7 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 });
-console.log("errors")
+// console.log("errors")
 function onWindowResize() {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
