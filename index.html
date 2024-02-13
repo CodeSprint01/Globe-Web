@@ -56,7 +56,7 @@
 
   <body>
     <!-- Add a div element for the active users box -->
-    <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span></div>
+    <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span> <button id="locateMeBox">Locate Me</button></div>
     <script type="text/javascript">
       // Your existing JavaScript code here
 
@@ -70,8 +70,9 @@
       updateActiveUsersBox();
 
       // Update the active users count box continuously (you may want to throttle or debounce this in a real application)
-      setInterval(updateActiveUsersBox, 1000); // Update every second for demonstration purposes
+      setInterval(updateActiveUsersBox, 100); // Update every second for demonstration purposes
     </script>
+    <!-- <div><button id="locateMeBox">Locate Me</button></div> -->
 
     <!-- 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -175,12 +176,12 @@
           localStorage.setItem("isOpen", false);
 
 
-          var formdata = new FormData();
-          formdata.append("ip", myIP);
+          // var formdata = new FormData();
+          // formdata.append("ip", myIP);
 
           var requestOptions = {
             method: "POST",
-            body: formdata,
+            // body: formdata,
             redirect: "follow",
           };
           fetch(`${baseURL}/api/addIp`, requestOptions)

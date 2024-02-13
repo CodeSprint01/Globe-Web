@@ -226,7 +226,7 @@ new THREE.InstancedBufferAttribute(new Float32Array(phase1), 1)
 
 
 const markerPositions = [];
-const markerCount = 100;
+const markerCount = 1000;
 let markerInfo = []; // information on markers
 let gMarker = new THREE.PlaneGeometry(0.7, 0.7);
 let mMarker = new THREE.MeshBasicMaterial({
@@ -351,7 +351,34 @@ scene.add(MillionDices);
 scene.add(markers1);
 // scene.add(markers);
 
+const locateMeBox = document.getElementById('locateMeBox');
+locateMeBox.addEventListener('click', ()=> {
+  const marker1Position = markerInfo1[0].crd;
+  // camera.position.copy(marker1Position.clone().setLength(14));
+  // camera.lookAt(marker1Position);
 
+  const startPosition = camera.position.clone();
+  const startQuaternion = camera.quaternion.clone();
+  const targetPosition = marker1Position.clone().setLength(14);
+  const targetQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler().setFromVector3(marker1Position));
+
+  const animationDuration = 1000;
+  const animationStartTime = Date.now();
+
+  function animateCamera() {
+    const timeElapsed = Date.now() - animationStartTime;
+    const progress = Math.min(timeElapsed / animationDuration, 1);
+
+    camera.position.lerpVectors(startPosition, targetPosition, progress);
+    camera.quaternion.copy(startQuaternion).slerp(targetQuaternion, progress);
+
+    if (progress < 1) {
+      requestAnimationFrame(animateCamera);
+    }
+  }
+
+  animateCamera();
+});
 
 let galaxyGeometry = new THREE.SphereBufferGeometry(200, 550, 550);
 let galaxyMaterial = new THREE.MeshBasicMaterial({
