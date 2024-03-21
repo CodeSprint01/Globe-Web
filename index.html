@@ -57,6 +57,7 @@
   <body>
     <!-- Add a div element for the active users box -->
     <div id="activeUsersBox">Active Users:<span id="activeUsersCount">0</span> <button id="locateMeBox">Locate Me</button></div>
+    <div id="zoom"><button id="zoomIn">+</button><button id="zoomOut">-</button></div>
     <script type="text/javascript">
       // Your existing JavaScript code here
 
@@ -101,19 +102,6 @@
       // isChange = true;
 
       var myIP;
-      // const firebaseConfig = {
-      //   apiKey: "AIzaSyDPxU_rZPK_K9I0rjQJ3M3DWXqqTSiORQs",
-      //   authDomain: "globeupdated-42b99.firebaseapp.com",
-      //   projectId: "globeupdated-42b99",
-      //   storageBucket: "globeupdated-42b99.appspot.com",
-      //   messagingSenderId: "137226728360",
-      //   appId: "1:137226728360:web:0faa78d64049642dabe39d",
-      // };
-      // // Initialize Firebase
-      // const app = firebase.initializeApp(firebaseConfig);
-      // // app.firebase
-      // const db = firebase.firestore();
-
       fetch("https://api.ipify.org?format=json")
         .then((response) => response.json())
         .then((data) => {

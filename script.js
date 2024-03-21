@@ -1,6 +1,7 @@
 import * as THREE from "./3lib.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls";
 import { CSS2DRenderer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/renderers/CSS2DRenderer.js';
+// import { tweenZoom } from 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 2000);
@@ -24,15 +25,112 @@ window.addEventListener("resize", onWindowResize);
 
 let controls = new OrbitControls(camera, labelRenderer.domElement);
 controls.enablePan = false;
-controls.minDistance = 6;
+controls.minDistance = 11;
 controls.maxDistance = 15;
 controls.enableDamping = true;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.0;
+// updateCameraZoomLimit();
 
 let globalUniforms = {
   time: { value: 0 }
 };
+
+
+// function zoomIn() {
+//   controls.minDistance -= 3;
+//   controls.maxDistance -= 3; 
+//   updateProjectionMatrix();
+// }
+
+// function zoomOut() {
+//   controls.minDistance += 3;
+//   controls.maxDistance += 3;
+//   updateProjectionMatrix();
+// }
+
+// Define the target zoom levels
+let targetMinDistance = controls.minDistance;
+let targetMaxDistance = controls.maxDistance;
+
+// Flag to track if zoom animation is in progress
+let isTweening = false;
+
+// Define the lerping factor
+const lerpFactor = 0.1; // Adjust this value to control the speed of zooming
+
+// Function to smoothly transition between zoom levels
+function tweenZoom() {
+  // Calculate the new zoom levels using lerp
+  let newMinDistance = THREE.MathUtils.lerp(controls.minDistance, targetMinDistance, lerpFactor);
+  let newMaxDistance = THREE.MathUtils.lerp(controls.maxDistance, targetMaxDistance, lerpFactor);
+
+  // Update the camera controls with the new zoom levels
+  controls.minDistance = newMinDistance;
+  controls.maxDistance = newMaxDistance;
+
+  // Update the projection matrix
+  updateProjectionMatrix();
+
+  // Check if we reached the target zoom levels
+  if (Math.abs(newMinDistance - targetMinDistance) > 0.01 || Math.abs(newMaxDistance - targetMaxDistance) > 0.01) {
+    // If not, request the next frame to continue the animation
+    requestAnimationFrame(tweenZoom);
+  } else {
+    // Zoom animation finished, reset the tweening flag
+    isTweening = false;
+  }
+}
+
+// Function to smoothly zoom in
+function zoomIn() {
+  // Set the maximum allowed zoom in distance
+  const minZoomLimit = 4;
+
+  // Adjust the target zoom levels for zooming in only if the limit is not reached
+  if (targetMinDistance - 7 >= minZoomLimit) {
+    targetMinDistance -= 7;
+    targetMaxDistance -= 7;
+
+    // Start the tweening animation if it's not already running
+    if (!isTweening) {
+      isTweening = true;
+      tweenZoom();
+    }
+  }
+}
+
+
+// Function to smoothly zoom out
+function zoomOut() {
+  // Set the minimum allowed zoom out distance
+  const minZoomLimit = 20; // Adjust this value as needed
+
+  // Adjust the target zoom levels for zooming out only if the limit is not exceeded
+  if (targetMinDistance + 7 <= minZoomLimit) {
+    targetMinDistance += 7;
+    targetMaxDistance += 7;
+
+    // Start the tweening animation if it's not already running
+    if (!isTweening) {
+      isTweening = true;
+      tweenZoom();
+    }
+  }
+}
+
+
+// Function to update the projection matrix after zooming
+function updateProjectionMatrix() {
+  camera.updateProjectionMatrix();
+}
+
+
+
+//event listeners for zoom button
+document.getElementById('zoomIn').addEventListener('click',zoomIn);
+document.getElementById('zoomOut').addEventListener('click',zoomOut);
+
 
 let rad = 5;
 const shellGeometry = new THREE.SphereBufferGeometry(rad + 0.2, 64, 64);
