@@ -1,31 +1,29 @@
 import * as THREE from "./3lib.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls";
-import { CSS2DRenderer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/renderers/CSS2DRenderer.js';
-// import { tweenZoom } from 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
+import { CSS2DRenderer } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/renderers/CSS2DRenderer.js";
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 2000);
 camera.position.set(0.5, 0.5, 1).setLength(14);
 let renderer = new THREE.WebGLRenderer({
   physicallyCorrectLights: true,
-  antialias: true
+  antialias: true,
 });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x000000);
 document.body.appendChild(renderer.domElement);
 
-
 let labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize( window.innerWidth, window.innerHeight );
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0px';
-document.body.appendChild( labelRenderer.domElement );
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position = "absolute";
+labelRenderer.domElement.style.top = "0px";
+document.body.appendChild(labelRenderer.domElement);
 
 window.addEventListener("resize", onWindowResize);
 
 let controls = new OrbitControls(camera, labelRenderer.domElement);
 controls.enablePan = false;
-controls.minDistance = 11;
+controls.minDistance = 1;
 controls.maxDistance = 15;
 controls.enableDamping = true;
 controls.autoRotate = true;
@@ -33,21 +31,8 @@ controls.autoRotateSpeed = 0.0;
 // updateCameraZoomLimit();
 
 let globalUniforms = {
-  time: { value: 0 }
+  time: { value: 0 },
 };
-
-
-// function zoomIn() {
-//   controls.minDistance -= 3;
-//   controls.maxDistance -= 3; 
-//   updateProjectionMatrix();
-// }
-
-// function zoomOut() {
-//   controls.minDistance += 3;
-//   controls.maxDistance += 3;
-//   updateProjectionMatrix();
-// }
 
 // Define the target zoom levels
 let targetMinDistance = controls.minDistance;
@@ -62,8 +47,16 @@ const lerpFactor = 0.1; // Adjust this value to control the speed of zooming
 // Function to smoothly transition between zoom levels
 function tweenZoom() {
   // Calculate the new zoom levels using lerp
-  let newMinDistance = THREE.MathUtils.lerp(controls.minDistance, targetMinDistance, lerpFactor);
-  let newMaxDistance = THREE.MathUtils.lerp(controls.maxDistance, targetMaxDistance, lerpFactor);
+  let newMinDistance = THREE.MathUtils.lerp(
+    controls.minDistance,
+    targetMinDistance,
+    lerpFactor
+  );
+  let newMaxDistance = THREE.MathUtils.lerp(
+    controls.maxDistance,
+    targetMaxDistance,
+    lerpFactor
+  );
 
   // Update the camera controls with the new zoom levels
   controls.minDistance = newMinDistance;
@@ -73,7 +66,10 @@ function tweenZoom() {
   updateProjectionMatrix();
 
   // Check if we reached the target zoom levels
-  if (Math.abs(newMinDistance - targetMinDistance) > 0.01 || Math.abs(newMaxDistance - targetMaxDistance) > 0.01) {
+  if (
+    Math.abs(newMinDistance - targetMinDistance) > 0.01 ||
+    Math.abs(newMaxDistance - targetMaxDistance) > 0.01
+  ) {
     // If not, request the next frame to continue the animation
     requestAnimationFrame(tweenZoom);
   } else {
@@ -100,7 +96,6 @@ function zoomIn() {
   }
 }
 
-
 // Function to smoothly zoom out
 function zoomOut() {
   // Set the minimum allowed zoom out distance
@@ -119,109 +114,115 @@ function zoomOut() {
   }
 }
 
-
 // Function to update the projection matrix after zooming
 function updateProjectionMatrix() {
   camera.updateProjectionMatrix();
 }
 
-
-
 //event listeners for zoom button
-document.getElementById('zoomIn').addEventListener('click',zoomIn);
-document.getElementById('zoomOut').addEventListener('click',zoomOut);
-
+document.getElementById("zoomIn").addEventListener("click", zoomIn);
+document.getElementById("zoomOut").addEventListener("click", zoomOut);
 
 let rad = 5;
-const shellGeometry = new THREE.SphereBufferGeometry(rad + 0.2, 64, 64);
+const shellGeometry = new THREE.SphereBufferGeometry(1, 30, 30);
 const textureLoader1 = new THREE.TextureLoader();
-const texture3D1 = textureLoader1.load('./map2.jpeg'); 
+const texture3D1 = textureLoader1.load("./testMap.jpg", function (texture){
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.offset.x = 1.5708 / (2 * Math.PI);
+  shellMaterial.map = texture;
+});
 const shellMaterial = new THREE.MeshBasicMaterial({
   map: texture3D1,
   transparent: false,
-  depthTest: true
-})
+  depthTest: true,
+});
 const activeUsers = memberCount;
 
-function updateDiceGeometryandNumInstances(activeUsers){
-let numberDots;
-let dotHeight;
-let dotWidth;
+function updateDiceGeometryandNumInstances(activeUsers) {
+  let numberDots;
+  let dotHeight;
+  let dotWidth;
 
-switch(true){
-  case activeUsers <= 1000:
-    dotHeight = 0.07;
-    dotWidth = 0.07;
-    numberDots = 100000;
-    break;
-  case activeUsers <= 2000:
-    dotHeight = 0.05;
-    dotWidth = 0.05;
-    numberDots = 200000;
-    break;
-  case activeUsers <= 3000:
-    dotHeight = 0.04;
-    dotWidth = 0.04;
-    numberDots = 300000;
-    break;
-  case activeUsers <= 4000:
-    dotHeight = 0.035;
-    dotWidth = 0.035;
-    numberDots = 400000;
-    break;
-  case activeUsers <= 5000:
-    dotHeight = 0.029;
-    dotWidth = 0.029;
-    numberDots = 500000;
-    break;
-  case activeUsers <= 6000:
-    dotHeight = 0.015;
-    dotWidth = 0.015;
-    numberDots = 600000;
-  case activeUsers <= 7000:
-    dotHeight = 0.005;
-    dotWidth = 0.005;
-    numberDots = 700000;
-  default:
-    dotHeight = 0.045;
-    dotWidth = 0.045;
-    numberDots = 1000000;
+  switch (true) {
+    case activeUsers <= 1000:
+      dotHeight = 0.07;
+      dotWidth = 0.07;
+      numberDots = 100000;
+      break;
+    case activeUsers <= 2000:
+      dotHeight = 0.05;
+      dotWidth = 0.05;
+      numberDots = 200000;
+      break;
+    case activeUsers <= 3000:
+      dotHeight = 0.04;
+      dotWidth = 0.04;
+      numberDots = 300000;
+      break;
+    case activeUsers <= 4000:
+      dotHeight = 0.035;
+      dotWidth = 0.035;
+      numberDots = 400000;
+      break;
+    case activeUsers <= 5000:
+      dotHeight = 0.029;
+      dotWidth = 0.029;
+      numberDots = 500000;
+      break;
+    case activeUsers <= 6000:
+      dotHeight = 0.015;
+      dotWidth = 0.015;
+      numberDots = 600000;
+    case activeUsers <= 7000:
+      dotHeight = 0.005;
+      dotWidth = 0.005;
+      numberDots = 700000;
+    default:
+      dotHeight = 0.045;
+      dotWidth = 0.045;
+      numberDots = 1000000;
+  }
+
+  return {
+    dotHeight,
+    dotWidth,
+    numberDots,
+  };
 }
 
-return {
-  dotHeight,
-  dotWidth,
-  numberDots
-};
-}
-
-const dotSwitchData = updateDiceGeometryandNumInstances(activeUsers)
+const dotSwitchData = updateDiceGeometryandNumInstances(activeUsers);
 // console.log(dotSwitchData,"testing dots data");
 const shell = new THREE.Mesh(shellGeometry, shellMaterial);
 
 const sphereRadius = rad + 0.2; // Radius of the shell sphere
 const numInstances = dotSwitchData.numberDots;
 // console.log("sikander", memberCount, numInstances)
-const diceplan = new THREE.PlaneGeometry(dotSwitchData.dotHeight, dotSwitchData.dotWidth);
+const diceplan = new THREE.PlaneGeometry(
+  dotSwitchData.dotHeight,
+  dotSwitchData.dotWidth
+);
 const dicegeomatry = new THREE.MeshBasicMaterial({
   color: 0x000000,
   transparent: true,
   opacity: 0.8,
   // blending: THREE.NormalBlending,
   side: THREE.DoubleSide,
-  depthTest: true
+  depthTest: true,
 });
 
-let MillionDices = new THREE.InstancedMesh(diceplan, dicegeomatry, numInstances);
-
+let MillionDices = new THREE.InstancedMesh(
+  diceplan,
+  dicegeomatry,
+  numInstances
+);
 
 const instancedMatrix = new THREE.Matrix4();
 // const distributionPoints = distribution(numInstances, sphereRadius);
 
 function distributeOnFibonacciSphere(samples, sphereRadius) {
   const points = [];
-  const phi = Math.PI * (3. - Math.sqrt(5.)); // golden angle in radians
-  
+  const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle in radians
+
   for (let i = 0; i < samples; i++) {
     const y = 1 - (i / (samples - 1)) * 2; // y goes from 1 to -1
     const radius = Math.sqrt(1 - y * y); // radius at y
@@ -230,7 +231,7 @@ function distributeOnFibonacciSphere(samples, sphereRadius) {
 
     const x = Math.cos(theta) * radius;
     const z = Math.sin(theta) * radius;
-    
+
     points.push(new THREE.Vector3(x, y, z).multiplyScalar(sphereRadius));
   }
 
@@ -238,16 +239,22 @@ function distributeOnFibonacciSphere(samples, sphereRadius) {
 }
 
 // Usage
-const distributionPoints = distributeOnFibonacciSphere(numInstances, sphereRadius);
+const distributionPoints = distributeOnFibonacciSphere(
+  numInstances,
+  sphereRadius
+);
 
 for (let i = 0; i < numInstances; i++) {
   const position = distributionPoints[i];
   instancedMatrix.makeTranslation(position.x, position.y, position.z);
   const normal = position.clone().normalize();
-  instancedMatrix.lookAt(new THREE.Vector3(), normal, new THREE.Vector3(0, 1, 0));
+  instancedMatrix.lookAt(
+    new THREE.Vector3(),
+    normal,
+    new THREE.Vector3(0, 1, 0)
+  );
   MillionDices.setMatrixAt(i, instancedMatrix);
 }
-
 
 const onemarkerPositions = [];
 const oneMarkerCount = 1;
@@ -260,13 +267,13 @@ let mMarker1 = new THREE.MeshBasicMaterial({
   depthTest: true,
   onBeforeCompile: (shader) => {
     shader.uniforms.time = globalUniforms.time;
-  shader.vertexShader = `
+    shader.vertexShader = `
   attribute float phase;
   varying float vPhase;
   ${shader.vertexShader}
   `.replace(
-    `#include <begin_vertex>`,
-    `#include <begin_vertex>
+      `#include <begin_vertex>`,
+      `#include <begin_vertex>
     vPhase = phase; // de-synch of ripples
     `
     );
@@ -292,7 +299,7 @@ let mMarker1 = new THREE.MeshBasicMaterial({
     vec4 diffuseColor = vec4( diffuse, opacity );`
     );
     //console.log(shader.fragmentShader)
-}
+  },
 });
 mMarker1.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
 let markers1 = new THREE.InstancedMesh(gMarker1, mMarker1, oneMarkerCount);
@@ -300,46 +307,41 @@ let markers1 = new THREE.InstancedMesh(gMarker1, mMarker1, oneMarkerCount);
 let dummy1 = new THREE.Object3D();
 let phase1 = [];
 for (let i = 0; i < oneMarkerCount; i++) {
-dummy1.position.randomDirection().setLength(rad + 0.2);
-dummy1.lookAt(dummy1.position.clone().setLength(rad + 1));
-dummy1.updateMatrix();
-markers1.setMatrixAt(i, dummy1.matrix);
-phase1.push(Math.random());
+  dummy1.position.randomDirection().setLength(rad + 0.2);
+  dummy1.lookAt(dummy1.position.clone().setLength(rad + 1));
+  dummy1.updateMatrix();
+  markers1.setMatrixAt(i, dummy1.matrix);
+  phase1.push(Math.random());
 
-markerInfo1.push({
-  id: i + 1,
-  mag: THREE.MathUtils.randInt(1, 10),
-  crd: dummy1.position.clone()
-});
-onemarkerPositions.push(dummy1.position.clone()); // Store marker positions
+  markerInfo1.push({
+    id: i + 1,
+    mag: THREE.MathUtils.randInt(1, 10),
+    crd: dummy1.position.clone(),
+  });
+  onemarkerPositions.push(dummy1.position.clone()); // Store marker positions
 }
 gMarker1.setAttribute(
-"phase1",
-new THREE.InstancedBufferAttribute(new Float32Array(phase1), 1)
+  "phase1",
+  new THREE.InstancedBufferAttribute(new Float32Array(phase1), 1)
 );
-
-
-
-
-
 
 const markerPositions = [];
 const markerCount = 1000;
 let markerInfo = []; // information on markers
 let gMarker = new THREE.PlaneGeometry(0.7, 0.7);
 let mMarker = new THREE.MeshBasicMaterial({
-color: 0xfddc5c,
-opacity: 0.0,
-transparent: false,
-onBeforeCompile: (shader) => {
-  shader.uniforms.time = globalUniforms.time;
-  shader.vertexShader = `
+  color: 0xfddc5c,
+  opacity: 0.0,
+  transparent: false,
+  onBeforeCompile: (shader) => {
+    shader.uniforms.time = globalUniforms.time;
+    shader.vertexShader = `
   attribute float phase;
   varying float vPhase;
   ${shader.vertexShader}
   `.replace(
-    `#include <begin_vertex>`,
-    `#include <begin_vertex>
+      `#include <begin_vertex>`,
+      `#include <begin_vertex>
     vPhase = phase; // de-synch of ripples
     `
     );
@@ -365,7 +367,7 @@ onBeforeCompile: (shader) => {
     vec4 diffuseColor = vec4( diffuse, opacity );`
     );
     //console.log(shader.fragmentShader)
-}
+  },
 });
 mMarker.defines = { USE_UV: " " }; // needed to be set to be able to work with UVs
 let markers = new THREE.InstancedMesh(gMarker, mMarker, markerCount);
@@ -373,22 +375,22 @@ let markers = new THREE.InstancedMesh(gMarker, mMarker, markerCount);
 let dummy = new THREE.Object3D();
 let phase = [];
 for (let i = 0; i < markerCount; i++) {
-dummy.position.randomDirection().setLength(rad + 0.2);
-dummy.lookAt(dummy.position.clone().setLength(rad + 1));
-dummy.updateMatrix();
-markers.setMatrixAt(i, dummy.matrix);
-phase.push(Math.random());
+  dummy.position.randomDirection().setLength(rad + 0.2);
+  dummy.lookAt(dummy.position.clone().setLength(rad + 1));
+  dummy.updateMatrix();
+  markers.setMatrixAt(i, dummy.matrix);
+  phase.push(Math.random());
 
-markerInfo.push({
-  id: i + 1,
-  mag: THREE.MathUtils.randInt(1, 10),
-  crd: dummy.position.clone()
-});
-markerPositions.push(dummy.position.clone()); // Store marker positions
+  markerInfo.push({
+    id: i + 1,
+    mag: THREE.MathUtils.randInt(1, 10),
+    crd: dummy.position.clone(),
+  });
+  markerPositions.push(dummy.position.clone()); // Store marker positions
 }
 gMarker.setAttribute(
-"phase",
-new THREE.InstancedBufferAttribute(new Float32Array(phase), 1)
+  "phase",
+  new THREE.InstancedBufferAttribute(new Float32Array(phase), 1)
 );
 
 function removeRandomInstances(numToRemove) {
@@ -426,8 +428,8 @@ function removeRandomInstances(numToRemove) {
   }
 
   // Add the new mesh to the scene (replace the old one if needed)
-  scene.remove(MillionDices);
-  scene.add(newMillionDices);
+  // scene.remove(MillionDices);
+  // scene.add(newMillionDices);
 
   // Update matrix after removal
   newMillionDices.instanceMatrix.needsUpdate = true;
@@ -436,29 +438,101 @@ function removeRandomInstances(numToRemove) {
   MillionDices = newMillionDices;
 }
 
-
-removeRandomInstances(memberCount)
+removeRandomInstances(memberCount);
 
 shell.renderOrder = 1;
 MillionDices.renderOrder = 2;
 markers.renderOrder = 3;
 markers1.renderOrder = 4;
 scene.add(shell);
-scene.add(MillionDices);
+// scene.add(MillionDices);
 
 scene.add(markers1);
 // scene.add(markers);
 
-const locateMeBox = document.getElementById('locateMeBox');
-locateMeBox.addEventListener('click', ()=> {
-  const marker1Position = markerInfo1[0].crd;
-  // camera.position.copy(marker1Position.clone().setLength(14));
-  // camera.lookAt(marker1Position);
 
+let mesh = new THREE.Mesh(
+  new THREE.SphereBufferGeometry(0.005, 20, 20),
+  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+);
+
+// let lat =15.6677 * Math.PI / 180;
+// let lng =96.5545 * Math.PI / 180;
+// let x = Math.cos(lng) * Math.sin(lat);
+// let y = Math.sin(lng) * Math.sin(lat);
+// let z = Math.cos(lat);
+// mesh.position.set(x,y,z);
+
+
+// const radius = 1;
+function calCartisanToSpherical(userLat, userLng, radius) {
+  // var phi = (90-lat)*(Math.PI/180);
+  // var theta = (lng+180)*(Math.PI/180);
+  // let x = -(Math.sin(phi)*Math.cos(theta));
+  // let y = (Math.sin(phi)*Math.sin(theta));
+  // let z = (Math.cos(phi));
+
+  const lat = userLat * (Math.PI / 180);
+  const lng = userLng * (Math.PI / 180);
+
+  const z = Math.cos(lat) * Math.cos(lng);
+  const x = Math.cos(lat) * Math.sin(lng);
+  const y = Math.sin(lat);
+  return {x, y, z};
+}
+
+let point = {
+  userLat: 65.9043597785829,
+  userLng: -120.65410056652323
+}
+
+let pos = calCartisanToSpherical(point.userLat, point.userLng);
+console.log("lskdfjsldk", pos);
+
+mesh.position.set(pos.x,pos.y,pos.z)
+// Add the mesh to the scene
+scene.add(mesh);
+
+
+let galaxyGeometry = new THREE.SphereBufferGeometry(200, 550, 550);
+let galaxyMaterial = new THREE.MeshBasicMaterial({
+  side: THREE.BackSide,
+});
+let galaxy = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
+const textureLoader2 = new THREE.TextureLoader();
+// Load Galaxy Textures
+textureLoader2.crossOrigin = true;
+textureLoader2.load("./background.jpg", function (texture) {
+  galaxyMaterial.map = texture;
+  // scene.add(galaxy);
+});
+// const db = firebase.firestore();
+
+// var list = await db.collection("users")
+// .get();
+
+// console.log(list.docs.length);
+// const oneMarkerCount = 30;
+let labelDiv = document.getElementById("markerLabel");
+let closeBtn = document.getElementById("closeButton");
+closeBtn.addEventListener("pointerdown", (event) => {
+  labelDiv.classList.add("hidden");
+});
+const initialMarker = markerInfo1[0];
+
+// Set camera position to the marker's position
+camera.position.copy(initialMarker.crd.clone().setLength(14));
+
+const locateMeBox = document.getElementById("locateMeBox");
+locateMeBox.addEventListener("click", () => {
+  const marker1Position = markerInfo1[0].crd;
   const startPosition = camera.position.clone();
   const startQuaternion = camera.quaternion.clone();
-  const targetPosition = marker1Position.clone().setLength(14);
-  const targetQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler().setFromVector3(marker1Position));
+  const targetPosition = initialMarker.crd.clone().setLength(14);
+
+  const targetQuaternion = new THREE.Quaternion().setFromEuler(
+    new THREE.Euler().setFromVector3(marker1Position)
+  );
 
   const animationDuration = 1000;
   const animationStartTime = Date.now();
@@ -478,37 +552,7 @@ locateMeBox.addEventListener('click', ()=> {
   animateCamera();
 });
 
-let galaxyGeometry = new THREE.SphereBufferGeometry(200, 550, 550);
-let galaxyMaterial = new THREE.MeshBasicMaterial({
-  side: THREE.BackSide
-});
-let galaxy = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
-const textureLoader2 = new THREE.TextureLoader();
-// Load Galaxy Textures
-textureLoader2.crossOrigin = true;
-textureLoader2.load(
-  './background.jpg',
-  function(texture) {
-    galaxyMaterial.map = texture;
-    scene.add(galaxy);
-  }
-);
-  // const db = firebase.firestore();
-  
-  // var list = await db.collection("users")
-  // .get();
-  
-  // console.log(list.docs.length);
-  // const oneMarkerCount = 30;
-  let labelDiv = document.getElementById("markerLabel");
-  let closeBtn = document.getElementById("closeButton");
-  closeBtn.addEventListener("pointerdown", event => {
-  labelDiv.classList.add("hidden");
-})
-const initialMarker = markerInfo1[0];
 
-// Set camera position to the marker's position
-camera.position.copy(initialMarker.crd.clone().setLength(14));
 
 // Set camera lookAt to the marker's position
 camera.lookAt(initialMarker.crd);
